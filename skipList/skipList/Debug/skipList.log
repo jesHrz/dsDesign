@@ -1,0 +1,19 @@
+﻿  main.cpp
+d:\mycodes\github\dsdesign\skiplist\skiplist\main.cpp(23): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+d:\mycodes\github\dsdesign\skiplist\skiplist\main.cpp(24): warning C4305: “参数”: 从“double”到“float”截断
+d:\mycodes\github\dsdesign\skiplist\skiplist\skiplist.h(43): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+  d:\mycodes\github\dsdesign\skiplist\skiplist\skiplist.h(41): note: 编译 类 模板 成员函数 "skipList<int,int>::skipList(const K,const K,int,float)" 时
+          with
+          [
+              K=int
+          ]
+  d:\mycodes\github\dsdesign\skiplist\skiplist\main.cpp(24): note: 参见对正在编译的函数 模板 实例化“skipList<int,int>::skipList(const K,const K,int,float)”的引用
+          with
+          [
+              K=int
+          ]
+  d:\mycodes\github\dsdesign\skiplist\skiplist\main.cpp(24): note: 参见对正在编译的 类 模板 实例化 "skipList<int,int>" 的引用
+d:\mycodes\github\dsdesign\skiplist\skiplist\skiplist.h(183): warning C4018: “<”: 有符号/无符号不匹配
+  d:\mycodes\github\dsdesign\skiplist\skiplist\skiplist.h(177): note: 编译 类 模板 成员函数 "void skipList<int,int>::output(std::ostream &)" 时
+  d:\mycodes\github\dsdesign\skiplist\skiplist\main.cpp(56): note: 参见对正在编译的函数 模板 实例化“void skipList<int,int>::output(std::ostream &)”的引用
+  skipList.vcxproj -> D:\Mycodes\Github\dsDesign\skipList\Debug\skipList.exe
