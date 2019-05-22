@@ -1,7 +1,5 @@
 # Data Structure Course Design
 
----
-
 ###### Includes following projects
 
 + [x] Skip list
