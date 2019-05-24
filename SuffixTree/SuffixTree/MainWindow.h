@@ -16,9 +16,9 @@ private:
 	SuffixTree* s;
 	std::string str;
 private slots:
-	void build();
-	void match();
-	void lcs();
-	void count();
-	void LongestRepeatString();
+	void build();//建树
+	void match();//匹配
+	void lcs();//lcs
+	void count();//计数
+	void LongestRepeatString();//最长公共子串
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include <sstream>
 class SuffixTree
 {
 protected:
@@ -7,11 +8,18 @@ protected:
 	int MAX_SIZE;//最大状态数
 	const char* s;
 
+	// 存放树形图
+	struct edge { int to, next; } *e;
+	int cnt, * head, *deg;
+	void add_edge(int, int);
+	void build(int, int);//打印树
+
 	void add(int); //末尾追加字符
 	void init(); //后缀树初始化
 	void get_endpos(); //统计endpos集合
 	int _find(const char[]) const;
 public:
+	std::stringstream ssm;
 	SuffixTree(const char[]);
 	SuffixTree(const SuffixTree&);
 	~SuffixTree();
@@ -19,5 +27,6 @@ public:
 	int count(const char[]) const;//模式串统计
 	int lcs(const char[], char[]) const;//最长公共子串
 	int LongestRepetitiveSubstring(char[]) const;//最长重复子串
+	int getSZ() const { return sz;  }
 };
 

@@ -49,6 +49,9 @@ SuffixTree::~SuffixTree() {
 	delete[] len;
 	delete[] firstpos;
 	delete[] endpos;
+	delete[] e;
+	delete[] deg;
+	delete[] head;
 }
 
 
@@ -109,7 +112,12 @@ void SuffixTree::get_endpos() {
 	//桶排序 按长度从大到小
 	int* tmp = new int[sz + 1];
 	int* ind = new int[sz + 1];
-	for (int i = 0; i < sz; ++i) ind[i] = tmp[i] = 0;
+	deg = new int[sz + 1];
+	head = new int[sz + 1];
+	e = new edge[MAX_SIZE];
+	cnt = 0;
+
+	for (int i = 0; i < sz; ++i) head[i] = deg[i] = ind[i] = tmp[i] = 0;
 	for (int i = 1; i < sz; ++i) tmp[len[i]]++;
 	for (int i = 1; i < sz; ++i) tmp[i] += tmp[i - 1];
 	for (int i = 1; i < sz; ++i) ind[tmp[len[i]]--] = i;
@@ -120,14 +128,42 @@ void SuffixTree::get_endpos() {
 		cur = next[cur][s[i] - 'a'];
 		endpos[cur] = 1;
 	}
-	//树上dp
+	//树上dp 建立树形图
 	for (int i = sz - 1; i > 0; --i) {
 		int cur = ind[i];
-		if (~link[cur]) endpos[link[cur]] += endpos[cur];
+		if (~link[cur]) {
+			endpos[link[cur]] += endpos[cur];
+			add_edge(link[i], i);
+			deg[link[i]]++;
+		}
 	}
-
+	ssm << ".\n";
+	build(0, 0);
 	delete[] tmp;
 	delete[] ind;
+}
+
+void SuffixTree::add_edge(int u, int v) {
+	e[++cnt] = { v, head[u] };
+	head[u] = cnt;
+}
+
+//打印后缀树
+void SuffixTree::build(int u, int dep) {
+	if (len[u]) {
+		for (int i = 0; i < dep - 1; ++i) ssm << "|   ";
+		if (--deg[link[u]])
+			ssm << "+---";
+		else
+			ssm << "+---";
+		for (int i = 0; i < len[u]; ++i) ssm << *(s + firstpos[u] - len[u] + 1 + i);
+		ssm << '\n';
+	}
+
+	for (int i = head[u]; i; i = e[i].next) {
+		int v = e[i].to;
+		build(v, dep + 1);
+	}
 }
 
 

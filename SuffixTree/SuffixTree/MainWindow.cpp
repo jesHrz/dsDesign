@@ -32,6 +32,10 @@ void MainWindow::build() {
 	s = new SuffixTree(&str[0]);
 	ui.label->setText(QString(str.c_str()) + ", building done!");
 	ui.setStatus(true);
+	//显示打印的后缀树
+	ui.tree->setGeometry(QRect(30, 140, 450, 50 + 15*s->getSZ()));
+	ui.MainWindow->resize(520, 200 + 15 * s->getSZ());
+	ui.tree->setText(s->ssm.str().c_str());
 }
 
 void MainWindow::match() {

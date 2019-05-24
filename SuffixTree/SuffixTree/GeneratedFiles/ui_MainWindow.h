@@ -41,16 +41,20 @@ public:
 	QLabel* Ttr;
 	QLabel* Qtr;
 	QLabel* Ptr;
+	QLabel* tree;
 	QMenuBar* menuBar;
+
+	QMainWindow* MainWindow;
 	
 
 	void setupUi(QMainWindow* MainWindowClass)
 	{
+		MainWindow = MainWindowClass;
 		if (MainWindowClass->objectName().isEmpty())
 			MainWindowClass->setObjectName(QString::fromUtf8("MainWindowClass"));
 		MainWindowClass->resize(520, 150);
-		MainWindowClass->setMaximumSize(520, 150);
-		MainWindowClass->setMinimumSize(520, 150);
+		//MainWindowClass->setMaximumSize(520, 150);
+		//MainWindowClass->setMinimumSize(520, 150);
 		centralWidget = new QWidget(MainWindowClass);
 		centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
 		build = new QPushButton(centralWidget);
@@ -83,6 +87,8 @@ public:
 		label = new QLabel(centralWidget);
 		label->setObjectName(QString::fromUtf8("label"));
 		label->setGeometry(QRect(30, 90, 450, 50));
+		tree = new QLabel(centralWidget);
+		tree->setObjectName(QString::fromUtf8("tree"));
 		Str = new QLabel(centralWidget);
 		Str->setObjectName(QString::fromUtf8("Str"));
 		Str->setGeometry(QRect(10, 22, 10, 15));
