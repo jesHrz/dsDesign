@@ -2,18 +2,14 @@
 #include <cstring>
 
 
-SuffixTree::SuffixTree(const char str[]) {
+SuffixTree::SuffixTree(const char str[], const int M) {
 	s = str;
 	int n = strlen(s);
 	MAX_SIZE = n * 2;
 	sz = last = 0;
 	// 数组初始化
-	next = new int* [MAX_SIZE];
-	link = new int[MAX_SIZE];
-	len = new int[MAX_SIZE];
-	firstpos = new int[MAX_SIZE];
-	endpos = new int[MAX_SIZE];
-	for (int i = 0; i < MAX_SIZE; ++i)	next[i] = new int[26];
+	st = new SuffixTreeNode[MAX_SIZE];
+	for (int i = 0; i < MAX_SIZE; ++i)	st[i].allocatNext();
 	init();
 	//在线构造后缀树
 	for (int i = 0; i < n; ++i) add(s[i] - 'a');
@@ -26,29 +22,13 @@ SuffixTree::SuffixTree(const SuffixTree & t) {
 	last = t.last;
 	sz = t.sz;
 	s = t.s;
-	next = new int* [MAX_SIZE];
-	link = new int[MAX_SIZE];
-	len = new int[MAX_SIZE];
-	firstpos = new int[MAX_SIZE];
-	endpos = new int[MAX_SIZE];
-	for (int i = 0; i < MAX_SIZE; ++i) {
-		next[i] = new int[26];
-		memcpy(next[i], t.next[i], sizeof(int) * 26);
-	}
-	memcpy(link, t.link, sizeof(int) * MAX_SIZE);
-	memcpy(len, t.len, sizeof(int) * MAX_SIZE);
-	memcpy(firstpos, t.firstpos, sizeof(int) * MAX_SIZE);
-	memcpy(endpos, t.endpos, sizeof(int) * MAX_SIZE);
+	st = new SuffixTreeNode[MAX_SIZE];
+	for (int i = 0; i < sz; ++i)	st[i] = SuffixTreeNode(t.st[i]);
 }
 
 
 SuffixTree::~SuffixTree() {
-	for (int i = 0; i < MAX_SIZE; ++i)	delete[] next[i];
-	delete[] next;
-	delete[] link;
-	delete[] len;
-	delete[] firstpos;
-	delete[] endpos;
+	delete[] st;
 	delete[] e;
 	delete[] deg;
 	delete[] head;
@@ -56,13 +36,9 @@ SuffixTree::~SuffixTree() {
 
 
 void SuffixTree::init() {
-	memset(link, 0, sizeof(int) * MAX_SIZE);
-	memset(len, 0, sizeof(int) * MAX_SIZE);
-	memset(firstpos, 0, sizeof(int) * MAX_SIZE);
-	memset(endpos, 0, sizeof(int) * MAX_SIZE);
-	for (int i = 0; i < MAX_SIZE; ++i)	memset(next[i], 0, sizeof(int) * 26);
-	link[0] = -1;
-	len[0] = 0;
+	st[0].link = -1;
+	st[0].len = 0;
+	memset(st[0].next, 0, sizeof(int) * st[0].alpha_size);
 	last = 0;
 	sz = 1;
 }
@@ -70,38 +46,32 @@ void SuffixTree::init() {
 
 void SuffixTree::add(int c) {
 	int cur = sz++;
-	len[cur] = len[last] + 1;
-	firstpos[cur] = len[cur] - 1;
-	memset(next[cur], 0, sizeof next[cur]);
+	st[cur].len = st[last].len + 1;
+	st[cur].firstpos = st[cur].len - 1;
 	int p = last;
-	//沿后缀链接查询转移是否存在
-	while (~p && !next[p][c]) {
-		next[p][c] = cur;
-		p = link[p];
+	while (p != -1 && !st[p].next[c]) {
+		st[p].next[c] = cur;
+		p = st[p].link;
 	}
-	//找到根
 	if (p == -1) {
-		link[cur] = 0;
+		st[cur].link = 0;
 	}
 	else {
-		int q = next[p][c];
-		//不需要复制节点
-		if (len[p] + 1 == len[q]) {
-			link[cur] = q;
+		int q = st[p].next[c];
+		if (st[p].len + 1 == st[q].len) {
+			st[cur].link = q;
 		}
 		else {
-			//复制节点q
 			int clone = sz++;
-			memcpy(next[clone], next[q], sizeof(int) * 26);
-			len[clone] = len[p] + 1;
-			firstpos[clone] = firstpos[q];
-			link[clone] = link[q];
-			link[cur] = link[q] = clone;
-			//重新建立转移和后缀链接
-			while (~p && next[p][c] == q) {
-				next[p][c] = clone;
-				p = link[p];
+			st[clone].len = st[p].len + 1;
+			memcpy(st[clone].next, st[q].next, sizeof(int) * st[clone].alpha_size);
+			st[clone].link = st[q].link;
+			st[clone].firstpos = st[q].firstpos;
+			while (p != -1 && st[p].next[c] == q) {
+				st[p].next[c] = clone;
+				p = st[p].link;
 			}
+			st[q].link = st[cur].link = clone;
 		}
 	}
 	last = cur;
@@ -118,23 +88,23 @@ void SuffixTree::get_endpos() {
 	cnt = 0;
 
 	for (int i = 0; i < sz; ++i) head[i] = deg[i] = ind[i] = tmp[i] = 0;
-	for (int i = 1; i < sz; ++i) tmp[len[i]]++;
+	for (int i = 1; i < sz; ++i) tmp[st[i].len]++;
 	for (int i = 1; i < sz; ++i) tmp[i] += tmp[i - 1];
-	for (int i = 1; i < sz; ++i) ind[tmp[len[i]]--] = i;
+	for (int i = 1; i < sz; ++i) ind[tmp[st[i].len]--] = i;
 	int cur = 0;
 	int n = strlen(s);
 	//叶子节点初始化为1
 	for (int i = 0; i < n; ++i) {
-		cur = next[cur][s[i] - 'a'];
-		endpos[cur] = 1;
+		cur = st[cur].next[s[i] - 'a'];
+		st[cur].endpos = 1;
 	}
 	//树上dp 建立树形图
 	for (int i = sz - 1; i > 0; --i) {
 		int cur = ind[i];
-		if (~link[cur]) {
-			endpos[link[cur]] += endpos[cur];
-			add_edge(link[i], i);
-			deg[link[i]]++;
+		if (~st[cur].link) {
+			st[st[cur].link].endpos += st[cur].endpos;
+			add_edge(st[i].link, i);
+			deg[st[i].link]++;
 		}
 	}
 	ssm << ".\n";
@@ -150,13 +120,13 @@ void SuffixTree::add_edge(int u, int v) {
 
 //打印后缀树
 void SuffixTree::build(int u, int dep) {
-	if (len[u]) {
+	if (st[u].len) {
 		for (int i = 0; i < dep - 1; ++i) ssm << "|   ";
-		if (--deg[link[u]])
+		if (--deg[st[u].link])
 			ssm << "+---";
 		else
 			ssm << "+---";
-		for (int i = 0; i < len[u]; ++i) ssm << *(s + firstpos[u] - len[u] + 1 + i);
+		for (int i = 0; i < st[u].len; ++i) ssm << *(s + st[u].firstpos - st[u].len + 1 + i);
 		ssm << '\n';
 	}
 
@@ -172,7 +142,7 @@ int SuffixTree::_find(const char ptr[]) const {
 	int cur = 0;
 	//沿状态转移
 	for (int i = 0; i < n; ++i) {
-		if (next[cur][ptr[i] - 'a'])	cur = next[cur][ptr[i] - 'a'];
+		if (st[cur].next[ptr[i] - 'a'])	cur = st[cur].next[ptr[i] - 'a'];
 		else return -1;
 	}
 	return cur;
@@ -181,7 +151,7 @@ int SuffixTree::_find(const char ptr[]) const {
 
 int SuffixTree::find(const char ptr[]) const {
 	int cur = _find(ptr);
-	if (~cur)	return firstpos[cur] - strlen(ptr) + 1;
+	if (~cur)	return st[cur].firstpos - strlen(ptr) + 1;
 	return -1;
 }
 
@@ -189,7 +159,7 @@ int SuffixTree::find(const char ptr[]) const {
 int SuffixTree::count(const char ptr[]) const {
 	int cur = _find(ptr);
 	if (cur == -1)	return 0;
-	return endpos[cur];
+	return st[cur].endpos;
 }
 
 
@@ -198,12 +168,12 @@ int SuffixTree::lcs(const char ptr[], char res[] = nullptr) const {
 	int cur = 0, l = 0, best = 0, bestpos = 0;
 	for (int i = 0; i < n; ++i) {
 		//当前状态不存在ptr[i]的转移
-		while (cur && !next[cur][ptr[i] - 'a']) {
-			cur = link[cur];
-			l = len[cur];
+		while (cur && !st[cur].next[ptr[i] - 'a']) {
+			cur = st[cur].link;
+			l = st[cur].len;
 		}
-		if (next[cur][ptr[i] - 'a']) {
-			cur = next[cur][ptr[i] - 'a'];
+		if (st[cur].next[ptr[i] - 'a']) {
+			cur = st[cur].next[ptr[i] - 'a'];
 			l++;
 		}
 		//更新答案
@@ -222,15 +192,15 @@ int SuffixTree::LongestRepetitiveSubstring(char res[]) const {
 	int* tmp = new int[sz + 1];
 	int* ind = new int[sz + 1];
 	for (int i = 0; i < sz; ++i) ind[i] = tmp[i] = 0;
-	for (int i = 1; i < sz; ++i) tmp[len[i]]++;
+	for (int i = 1; i < sz; ++i) tmp[st[i].len]++;
 	for (int i = 1; i < sz; ++i) tmp[i] += tmp[i - 1];
-	for (int i = 1; i < sz; ++i) ind[tmp[len[i]]--] = i;
+	for (int i = 1; i < sz; ++i) ind[tmp[st[i].len]--] = i;
 	//从大到小遍历节点
 	for (int i = sz - 1; i; --i) {
 		int cur = ind[i];
-		if (endpos[cur] > 1) {
-			memcpy(res, s + firstpos[cur] - len[cur] + 1, len[cur]);
-			return len[cur];
+		if (st[cur].endpos > 1) {
+			memcpy(res, s + st[cur].firstpos - st[cur].len + 1, st[cur].len);
+			return st[cur].len;
 		}
 	}
 	return -1;

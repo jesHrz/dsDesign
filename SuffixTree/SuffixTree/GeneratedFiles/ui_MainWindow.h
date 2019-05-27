@@ -45,7 +45,7 @@ public:
 	QMenuBar* menuBar;
 
 	QMainWindow* MainWindow;
-	
+
 
 	void setupUi(QMainWindow* MainWindowClass)
 	{

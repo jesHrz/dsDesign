@@ -1,9 +1,10 @@
 #pragma once
 #include <sstream>
+#include "SuffixTreeNode.h"
 class SuffixTree
 {
 protected:
-	int** next, * link, * len, * endpos, * firstpos;
+	SuffixTreeNode* st;
 	int last, sz;//当前状态、状态数
 	int MAX_SIZE;//最大状态数
 	const char* s;
@@ -20,7 +21,7 @@ protected:
 	int _find(const char[]) const;
 public:
 	std::stringstream ssm;
-	SuffixTree(const char[]);
+	SuffixTree(const char[], const int = 26);
 	SuffixTree(const SuffixTree&);
 	~SuffixTree();
 	int find(const char[]) const; //模式串匹配

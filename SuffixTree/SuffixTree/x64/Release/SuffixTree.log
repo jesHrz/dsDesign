@@ -1,6 +1,5 @@
-﻿  Moc'ing MainWindow.h...
-  moc_MainWindow.cpp
+﻿  main.cpp
   MainWindow.cpp
   SuffixTree.cpp
-  main.cpp
-  SuffixTree.vcxproj -> D:\Mycodes\Github\dsDesign\SuffixTree\x64\Release\SuffixTree.exe
+  moc_MainWindow.cpp
+  SuffixTree.vcxproj -> C:\Users\jesHrz\Documents\Mycodes\Github\dsDesign\SuffixTree\x64\Release\SuffixTree.exe
